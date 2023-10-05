@@ -1,0 +1,71 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: windrunner-sensor
+spec:
+  template:
+    serviceAccountName: argo-events-sa
+  dependencies:
+    - name: payload
+      eventSourceName: windrunner-webhook
+      eventName: windrunner
+  triggers:
+    - template:
+        name: argo-workflow-trigger
+        argoWorkflow:
+          operation: submit
+          source:
+            resource:
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                generateName: windrunner-workflow-
+              spec:
+                entrypoint: windrunner
+                arguments:
+                  parameters:
+                  - name: message
+                    value: hello world
+
+                volumeClaimTemplates:                 # define volume, same syntax as k8s Pod spec
+                - metadata:
+                    name: workdir                     # name of volume claim
+                  spec:
+                    accessModes: [ "ReadWriteOnce" ]
+                    resources:
+                      requests:
+                        storage: 1Gi                  # Gi => 1024 * 1024 * 1024
+
+                templates:
+                - name: windrunner
+                  steps:
+                  - - name: generate
+                      template: whalesay
+                  - - name: print
+                      template: print-message
+
+                - name: whalesay
+                  container:
+                    image: docker/whalesay:latest
+                    command: [sh, -c]
+                    args: ["echo generating message in volume; cowsay {{workflow.parameters.message}} | tee /mnt/vol/hello_world.txt"]
+                    # Mount workdir volume at /mnt/vol before invoking docker/whalesay
+                    volumeMounts:                     # same syntax as k8s Pod spec
+                    - name: workdir
+                      mountPath: /mnt/vol
+
+                - name: print-message
+                  container:
+                    image: alpine:latest
+                    command: [sh, -c]
+                    args: ["echo getting message from volume; find /mnt/vol; cat /mnt/vol/hello_world.txt"]
+                    # Mount workdir volume at /mnt/vol before invoking docker/whalesay
+                    volumeMounts:                     # same syntax as k8s Pod spec
+                    - name: workdir
+                      mountPath: /mnt/vol
+
+          parameters:
+            - src:
+                dependencyName: payload
+                dataKey: body.message
+              dest: spec.arguments.parameters.0.value

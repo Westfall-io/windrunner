@@ -1,0 +1,14 @@
+apiVersion: argoproj.io/v1alpha1
+kind: EventSource
+metadata:
+  name: windrunner-webhook
+spec:
+  service:
+    ports:
+      - port: 12000
+        targetPort: 12000
+  webhook:
+    windrunner:
+      port: "12000"
+      endpoint: /windrunner
+      method: POST
