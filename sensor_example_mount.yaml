@@ -1,0 +1,105 @@
+# This example runs a sensor that attaches a persistent volume to all of the
+# workflow components, for the second and third template this attachment point
+# is dynamically generated based on the working directory of the first.
+
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: windrunner-sensor
+spec:
+  template:
+    serviceAccountName: argo-events-sa
+  dependencies:
+    - name: payload
+      eventSourceName: windrunner-webhook
+      eventName: windrunner
+  triggers:
+    - template:
+        name: argo-workflow-trigger
+        argoWorkflow:
+          operation: submit
+          source:
+            resource:
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                generateName: windrunner-workflow-
+              spec:
+                serviceAccountName: argo-events-sa
+                entrypoint: windrunner
+                arguments:
+                  parameters:
+                  - name: message
+                    value: hello world
+                volumeClaimGC:
+                  strategy: OnWorkflowCompletion
+                volumeClaimTemplates:                 # define volume, same syntax as k8s Pod spec
+                - metadata:
+                    name: workdir                     # name of volume claim
+                  spec:
+                    accessModes: [ "ReadWriteOnce" ]
+                    resources:
+                      requests:
+                        storage: 1Gi                  # Gi => 1024 * 1024 * 1024
+
+                templates:
+                - name: windrunner
+                  steps:
+                  - - name: getpwd
+                      template: whalesay-pwd
+                  - - name: generate
+                      template: whalesay
+                      arguments:
+                        parameters:
+                        - name: volume
+                          value: "{{steps.getpwd.outputs.parameters.path}}"
+                  - - name: print
+                      template: print-message
+                      arguments:
+                        parameters:
+                        - name: volume
+                          value: "{{steps.getpwd.outputs.parameters.path}}"
+
+                - name: whalesay-pwd
+                  container:
+                    image: docker/whalesay:latest
+                    command: [sh, -c]
+                    args: ["mkdir /mnt/vol/digitalforge; pwd > /mnt/vol/digitalforge/path.txt; cp -r . /mnt/vol"]
+                    volumeMounts:                     # same syntax as k8s Pod spec
+                    - name: workdir
+                      mountPath: /mnt/vol
+                  outputs:
+                    parameters:
+                    - name: path  # name of output parameter
+                      valueFrom:
+                        path: /mnt/vol/digitalforge/path.txt
+
+                - name: whalesay
+                  inputs:
+                    parameters:
+                    - name: volume
+                  container:
+                    image: docker/whalesay:latest
+                    command: [sh, -c]
+                    args: ["echo generating message in volume; cowsay {{workflow.parameters.message}} | tee {{inputs.parameters.volume}}/hello_world.txt"]
+                    volumeMounts:                     # same syntax as k8s Pod spec
+                    - name: workdir
+                      mountPath: "{{inputs.parameters.volume}}"
+
+                - name: print-message
+                  inputs:
+                    parameters:
+                    - name: volume
+                  container:
+                    image: alpine:latest
+                    command: [sh, -c]
+                    args: ["echo getting message from volume; cat {{inputs.parameters.volume}}/hello_world.txt; cat {{inputs.parameters.volume}}/digitalforge/path.txt"]
+                    volumeMounts:                     # same syntax as k8s Pod spec
+                    - name: workdir
+                      mountPath: "{{inputs.parameters.volume}}"
+
+          parameters:
+            - src:
+                dependencyName: payload
+                dataKey: body.message
+              dest: spec.arguments.parameters.0.value
