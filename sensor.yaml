@@ -1,3 +1,7 @@
+# This example runs a sensor that attaches a persistent volume to all of the
+# workflow components, for the second and third template this attachment point
+# is dynamically generated based on the working directory of the first.
+
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
@@ -21,12 +25,42 @@ spec:
               metadata:
                 generateName: windrunner-workflow-
               spec:
+                serviceAccountName: argo-events-sa
                 entrypoint: windrunner
+                ttlStrategy:
+                  secondsAfterCompletion: 120 # Time to live after workflow is completed, replaces ttlSecondsAfterFinished
+                  secondsAfterSuccess: 120     # Time to live after workflow is successful
+                  secondsAfterFailure: 120     # Time to live after workflow fails
                 arguments:
                   parameters:
-                  - name: message
-                    value: hello world
-
+                  - name: windrunner-imagetag
+                    value: 0.1.42
+                  - name: container-host
+                    value: core.harbor.domain
+                  - name: container
+                    value: python-greaterthan
+                  - name: project
+                    value: python-sample-containers
+                  - name: container-tag
+                    value: latest
+                  - name: action
+                    value:
+                      artifact:
+                        full_name: Westfall/python-greaterthan
+                        ref: main
+                      variables:
+                        var1:
+                          value: 10
+                          units: u.one
+                        var2:
+                          value: 3
+                          units: u.one
+                  - name: thread_execution
+                    value: 0
+                  - name: prev_thread_name
+                    value: null
+                volumeClaimGC:
+                  strategy: OnWorkflowCompletion
                 volumeClaimTemplates:                 # define volume, same syntax as k8s Pod spec
                 - metadata:
                     name: workdir                     # name of volume claim
@@ -39,27 +73,89 @@ spec:
                 templates:
                 - name: windrunner
                   steps:
-                  - - name: generate
-                      template: whalesay
-                  - - name: print
-                      template: print-message
+                  - - name: init-volume
+                      template: init-volume
+                  - - name: cp-volume
+                      template: cp-volume
+                  - - name: prep-volume-s3
+                      template: prep-volume-s3
+                  - - name: run-main
+                      template: main
+                      continueOn:
+                        failed: true
+                      arguments:
+                        parameters:
+                        - name: volume
+                          value: "{{steps.init-volume.outputs.parameters.path}}"
+                        - name: cmd
+                          value: "{{steps.init-volume.outputs.parameters.cmd}}"
+                        - name: args
+                          value: "{{steps.init-volume.outputs.parameters.args}}"
+                  - - name: volume-cleanup
+                      template: volume-cleanup
 
-                - name: whalesay
+                # Run this volume to pull the docker image and inspect it
+                - name: init-volume
                   container:
-                    image: docker/whalesay:latest
+                    image: "core.harbor.domain/digitalforge/windrunner:{{workflow.parameters.windrunner-imagetag}}"
+                    command: ["python"]
+                    args: ["src/docker_in.py", "{{workflow.parameters.project}}", "{{workflow.parameters.container}}"]
+                    volumeMounts:                     # same syntax as k8s Pod spec
+                    - name: workdir
+                      mountPath: /mnt/vol
+                  outputs:
+                    parameters:
+                    - name: path  # name of output parameter
+                      valueFrom:
+                        path: /mnt/vol/digitalforge/path.txt
+                    - name: cmd  # name of output parameter
+                      valueFrom:
+                        path: /mnt/vol/digitalforge/cmd.txt
+                    - name: args  # name of output parameter
+                      valueFrom:
+                        path: /mnt/vol/digitalforge/args.txt
+
+                # Copy the contents of the workdir to the shared volume
+                - name: cp-volume
+                  container:
+                    image: "{{workflow.parameters.container-host}}/{{workflow.parameters.project}}/{{workflow.parameters.container}}:{{workflow.parameters.container-tag}}"
                     command: [sh, -c]
-                    args: ["echo generating message in volume; cowsay {{workflow.parameters.message}} | tee /mnt/vol/hello_world.txt"]
-                    # Mount workdir volume at /mnt/vol before invoking docker/whalesay
+                    args: ["cp -r . /mnt/vol"]
                     volumeMounts:                     # same syntax as k8s Pod spec
                     - name: workdir
                       mountPath: /mnt/vol
 
-                - name: print-message
+                # Pull the artifacts and overwrite, also upload to s3
+                - name: prep-volume-s3
                   container:
-                    image: alpine:latest
-                    command: [sh, -c]
-                    args: ["echo getting message from volume; find /mnt/vol; cat /mnt/vol/hello_world.txt"]
-                    # Mount workdir volume at /mnt/vol before invoking docker/whalesay
+                    image: "core.harbor.domain/digitalforge/windrunner:{{workflow.parameters.windrunner-imagetag}}"
+                    command: [python]
+                    args: ["src/main.py", "{{workflow.parameters.action}}", "{{workflow.parameters.thread_execution}}", "{{workflow.parameters.prev_thread_name}}"]
+                    volumeMounts:                     # same syntax as k8s Pod spec
+                    - name: workdir
+                      mountPath: /mnt/vol
+
+                - name: main
+                  inputs:
+                    parameters:
+                    - name: volume
+                    - name: cmd
+                    - name: args
+                  activeDeadlineSeconds: 86400
+                  podSpecPatch: '{"containers":[{"name":"main", "args":{{inputs.parameters.args}}}]}'
+                  container:
+                    image: "{{workflow.parameters.container-host}}/{{workflow.parameters.project}}/{{workflow.parameters.container}}:{{workflow.parameters.container-tag}}"
+                    command: ["{{inputs.parameters.cmd}}"]
+                    args: ["{{inputs.parameters.args}}"]
+                    volumeMounts:                     # same syntax as k8s Pod spec
+                    - name: workdir
+                      mountPath: "{{inputs.parameters.volume}}"
+
+                - name: volume-cleanup
+                  container:
+                    image: core.harbor.domain/digitalforge/windchest:0.1.33
+                    command: [python]
+                    args: ["src/main.py", "{{workflow.parameters.action}}", "{{workflow.parameters.thread_execution}}"]
                     volumeMounts:                     # same syntax as k8s Pod spec
                     - name: workdir
                       mountPath: /mnt/vol
@@ -67,5 +163,25 @@ spec:
           parameters:
             - src:
                 dependencyName: payload
-                dataKey: body.message
-              dest: spec.arguments.parameters.0.value
+                dataKey: body.action.container.image
+              dest: spec.arguments.parameters.2.value
+            - src:
+                dependencyName: payload
+                dataKey: body.action.container.project
+              dest: spec.arguments.parameters.3.value
+            - src:
+                dependencyName: payload
+                dataKey: body.action.container.tag
+              dest: spec.arguments.parameters.4.value
+            - src:
+                dependencyName: payload
+                dataKey: body.action
+              dest: spec.arguments.parameters.5.value
+            - src:
+                dependencyName: payload
+                dataKey: body.thread_execution
+              dest: spec.arguments.parameters.6.value
+            - src:
+                dependencyName: payload
+                dataKey: body.prev_thread_name
+              dest: spec.arguments.parameters.7.value
