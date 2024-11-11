@@ -15,24 +15,13 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# Windrunner
+import os
 
-# start by building the basic container
-FROM python:3.11-slim
+## WINDRUNNER CONFIGURATION VALUES
+VOLDEF = "/mnt/vol"
+VOLUME = os.environ.get("VOLUME",VOLDEF)
 
-ENV PIP_DEFAULT_TIMEOUT=100 \
-    # Allow statements and log messages to immediately appear
-    PYTHONUNBUFFERED=1 \
-    # disable a pip version check to reduce run-time & log-spam
-    PIP_DISABLE_PIP_VERSION_CHECK=1 \
-    # cache is useless in docker image, so disable to reduce image size
-    PIP_NO_CACHE_DIR=1
-
-RUN apt-get update
-COPY requirements.txt .
-RUN pip install -r requirements.txt
-
-WORKDIR /app
-COPY src src
-
-CMD ["python", "src/main.py"]
+## HARBOR CONFIGURATION VALUES
+HARBORHOST = os.environ.get("HARBORHOST","http://harbor-core.harbor/api/v2.0")
+HARBORUSER = os.environ.get("HARBORUSER",'admin')
+HARBORPASS = os.environ.get("HARBORPASS",'Harbor12345')

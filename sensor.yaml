@@ -97,7 +97,7 @@ spec:
                 # Run this volume to pull the docker image and inspect it
                 - name: init-volume
                   container:
-                    image: "core.harbor.domain/digitalforge/windrunner:{{workflow.parameters.windrunner-imagetag}}"
+                    image: "docker.io/westfall/windrunner:{{workflow.parameters.windrunner-imagetag}}"
                     command: ["python"]
                     args: ["src/docker_in.py", "{{workflow.parameters.project}}", "{{workflow.parameters.container}}"]
                     volumeMounts:                     # same syntax as k8s Pod spec
