@@ -25,7 +25,7 @@ dfpath = os.path.join(VOLUME, 'digitalforge')
 if not os.path.exists(dfpath):
     os.mkdir(dfpath)
 
-from harbor.artifact import get_artifact, get_linux_digest
+from windbinder.harbor.artifact import get_artifact, get_linux_digest
 
 def check_for_unhandled_config(config):
     if 'entrypoint' in [x.lower() for x in config.keys()]:
