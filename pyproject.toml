@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "windripper"
-version = "0.2.6"
+version = "0.0.1"
 description = "Argo Sensor for Harbor Containers"
 authors = ["Christopher Cox"]
 license = "MIT"
@@ -61,7 +61,7 @@ patch_tags = [
 
 [project]
 name = "windripper"
-version = "0.2.6"
+version = "0.0.1"
 authors = [
   { name="Christopher Cox", email="chris.cox@westfall.io" },
 ]
