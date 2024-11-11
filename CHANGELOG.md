@@ -1,10 +1,16 @@
 # CHANGELOG
 
+## v0.0.2 (2024-11-11)
+
 ## v0.0.1 (2024-11-11)
 
 ### :bug:
 
 * :bug: Adding debug for harbor endpoints ([`5154955`](https://github.com/Westfall-io/windrunner/commit/51549556ab8d42ac90f02d76d9d3f45570b92dd1))
+
+### :memo:
+
+* :memo: Adding updates to workflow ([`84649d4`](https://github.com/Westfall-io/windrunner/commit/84649d41c2bdd956e6f7383ab6f65ee264a29882))
 
 ### :zap:
 
