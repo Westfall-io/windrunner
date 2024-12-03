@@ -34,9 +34,13 @@ spec:
                 arguments:
                   parameters:
                   - name: windrunner-imagetag
-                    value: 0.1.42
+                    value: v0.0.2
+                  - name: windbound-imagetag
+                    value: 0.0.2
+                  - name: windchest-imagetag
+                    value: 0.0.2
                   - name: container-host
-                    value: core.harbor.domain
+                    value: harbor.digitalforge.app
                   - name: container
                     value: python-greaterthan
                   - name: project
@@ -70,6 +74,8 @@ spec:
                       requests:
                         storage: 1Gi                  # Gi => 1024 * 1024 * 1024
 
+                imagePullSecrets:
+                - name: harborcred
                 templates:
                 - name: windrunner
                   steps:
@@ -97,9 +103,9 @@ spec:
                 # Run this volume to pull the docker image and inspect it
                 - name: init-volume
                   container:
-                    image: "docker.io/westfall/windrunner:{{workflow.parameters.windrunner-imagetag}}"
+                    image: "docker.io/westfallio/windrunner:{{workflow.parameters.windrunner-imagetag}}"
                     command: ["python"]
-                    args: ["src/docker_in.py", "{{workflow.parameters.project}}", "{{workflow.parameters.container}}"]
+                    args: ["src/main.py", "{{workflow.parameters.project}}", "{{workflow.parameters.container}}"]
                     volumeMounts:                     # same syntax as k8s Pod spec
                     - name: workdir
                       mountPath: /mnt/vol
@@ -125,10 +131,11 @@ spec:
                     - name: workdir
                       mountPath: /mnt/vol
 
+
                 # Pull the artifacts and overwrite, also upload to s3
                 - name: prep-volume-s3
                   container:
-                    image: "core.harbor.domain/digitalforge/windrunner:{{workflow.parameters.windrunner-imagetag}}"
+                    image: "docker.io/westfallio/windbound:{{workflow.parameters.windbound-imagetag}}"
                     command: [python]
                     args: ["src/main.py", "{{workflow.parameters.action}}", "{{workflow.parameters.thread_execution}}", "{{workflow.parameters.prev_thread_name}}"]
                     volumeMounts:                     # same syntax as k8s Pod spec
@@ -153,7 +160,7 @@ spec:
 
                 - name: volume-cleanup
                   container:
-                    image: core.harbor.domain/digitalforge/windchest:0.1.33
+                    image: "docker.io/westfallio/windchest:{{workflow.parameters.windchest-imagetag}}"
                     command: [python]
                     args: ["src/main.py", "{{workflow.parameters.action}}", "{{workflow.parameters.thread_execution}}"]
                     volumeMounts:                     # same syntax as k8s Pod spec
@@ -164,24 +171,24 @@ spec:
             - src:
                 dependencyName: payload
                 dataKey: body.action.container.image
-              dest: spec.arguments.parameters.2.value
-            - src:
-                dependencyName: payload
-                dataKey: body.action.container.project
-              dest: spec.arguments.parameters.3.value
-            - src:
-                dependencyName: payload
-                dataKey: body.action.container.tag
               dest: spec.arguments.parameters.4.value
             - src:
                 dependencyName: payload
-                dataKey: body.action
+                dataKey: body.action.container.project
               dest: spec.arguments.parameters.5.value
             - src:
                 dependencyName: payload
-                dataKey: body.thread_execution
+                dataKey: body.action.container.tag
               dest: spec.arguments.parameters.6.value
             - src:
                 dependencyName: payload
-                dataKey: body.prev_thread_name
+                dataKey: body.action
               dest: spec.arguments.parameters.7.value
+            - src:
+                dependencyName: payload
+                dataKey: body.thread_execution
+              dest: spec.arguments.parameters.8.value
+            - src:
+                dependencyName: payload
+                dataKey: body.prev_thread_name
+              dest: spec.arguments.parameters.9.value
