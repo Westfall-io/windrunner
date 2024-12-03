@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.0.9 (2024-12-03)
+
+### :bug:
+
+* :bug: Fixing an issue pulling from harbor api ([`76aaad7`](https://github.com/Westfall-io/windrunner/commit/76aaad76818e4138a75cd198d219b65fdb25d357))
+
 ## v0.0.8 (2024-12-03)
 
 ### :bug:
