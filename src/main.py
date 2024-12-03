@@ -25,7 +25,12 @@ dfpath = os.path.join(VOLUME, 'digitalforge')
 if not os.path.exists(dfpath):
     os.mkdir(dfpath)
 
-from windbinder.harbor.artifact import get_artifact, get_linux_digest
+try:
+    from windbinder.harbor.artifact import get_artifact, get_linux_digest
+except ModuleNotFoundError:
+    for (dirpath, dirnames, filenames) in os.walk(mypath):
+        print("{}  --  {}".format(dirpath,filenames))
+    raise ModuleNotFoundError
 
 def check_for_unhandled_config(config):
     if 'entrypoint' in [x.lower() for x in config.keys()]:
