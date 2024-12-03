@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.0.8 (2024-12-03)
+
+### :bug:
+
+* :bug: Fixing an issue where windbinder is not pushed to image ([`f1392a4`](https://github.com/Westfall-io/windrunner/commit/f1392a49a5abe4a20dcaabf7d3083d0fd71e1b2f))
+
 ## v0.0.7 (2024-12-03)
 
 ### :bug:
