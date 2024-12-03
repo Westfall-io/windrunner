@@ -34,13 +34,13 @@ spec:
                 arguments:
                   parameters:
                   - name: windrunner-imagetag
-                    value: v0.0.8
+                    value: v0.0.9
                   - name: windbound-imagetag
-                    value: 0.0.2
+                    value: v0.0.5
                   - name: windchest-imagetag
-                    value: 0.0.2
+                    value: v0.0.1
                   - name: container-host
-                    value: https://harbor.digitalforge.app/api/v2.0/
+                    value: harbor.digitalforge.app
                   - name: container
                     value: python-greaterthan
                   - name: project
@@ -141,6 +141,32 @@ spec:
                     volumeMounts:                     # same syntax as k8s Pod spec
                     - name: workdir
                       mountPath: /mnt/vol
+                    env:
+                    - name: MINIOUSER
+                      valueFrom:
+                        secretKeyRef:
+                          name: minioparams
+                          key: user
+                    - name: MINIOTOKEN
+                      valueFrom:
+                        secretKeyRef:
+                          name: minioparams
+                          key: password
+                    - name: WINDSTORMAPICLIENT
+                      valueFrom:
+                        secretKeyRef:
+                          name: keycloakparams
+                          key: windstormapiclient
+                    - name: WINDSTORMAPISECRET
+                      valueFrom:
+                        secretKeyRef:
+                          name: keycloakparams
+                          key: windstormapisecret
+                    - name: KEYCLOAKREALM
+                      valueFrom:
+                        secretKeyRef:
+                          name: keycloakparams
+                          key: realm
 
                 - name: main
                   inputs:
