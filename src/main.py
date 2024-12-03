@@ -25,12 +25,7 @@ dfpath = os.path.join(VOLUME, 'digitalforge')
 if not os.path.exists(dfpath):
     os.mkdir(dfpath)
 
-try:
-    from windbinder.harbor.artifact import get_artifact, get_linux_digest
-except ModuleNotFoundError:
-    for (dirpath, dirnames, filenames) in os.walk(os.getcwd()):
-        print("{}  --  {}".format(dirpath,filenames))
-    raise ModuleNotFoundError
+from windbinder.harbor.artifact import get_artifact, get_linux_digest
 
 def check_for_unhandled_config(config):
     if 'entrypoint' in [x.lower() for x in config.keys()]:
@@ -52,14 +47,15 @@ def store_container_config(data):
 
     return True
 
-def main(proj= "python-sample-containers", repo="python-pytest-boolfile"):
+def main(proj= "python-sample-containers", repo="python-pytest-boolfile",
+         tag="latest"):
     domain = HARBORHOST
     proj_url = "projects"
     repo_url = "repositories"
     artifact_url = "artifacts"
 
     url = os.path.join(domain, proj_url, proj, repo_url, repo,
-                       artifact_url, "sha256:"+digest)
+                       artifact_url, tag)
 
     data = get_artifact(url)
     linux_digest = get_linux_digest(data)
