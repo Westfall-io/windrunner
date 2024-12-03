@@ -28,7 +28,7 @@ if not os.path.exists(dfpath):
 try:
     from windbinder.harbor.artifact import get_artifact, get_linux_digest
 except ModuleNotFoundError:
-    for (dirpath, dirnames, filenames) in os.walk(mypath):
+    for (dirpath, dirnames, filenames) in os.walk(os.getcwd()):
         print("{}  --  {}".format(dirpath,filenames))
     raise ModuleNotFoundError
 
