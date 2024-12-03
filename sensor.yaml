@@ -34,7 +34,7 @@ spec:
                 arguments:
                   parameters:
                   - name: windrunner-imagetag
-                    value: v0.0.4
+                    value: v0.0.5
                   - name: windbound-imagetag
                     value: 0.0.2
                   - name: windchest-imagetag
