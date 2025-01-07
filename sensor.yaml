@@ -34,11 +34,11 @@ spec:
                 arguments:
                   parameters:
                   - name: windrunner-imagetag
-                    value: v0.0.9
+                    value: v0.2.0
                   - name: windbound-imagetag
-                    value: v0.0.21
+                    value: v0.2.0
                   - name: windchest-imagetag
-                    value: v0.0.28
+                    value: v0.2.0
                   - name: container-host
                     value: harbor.digitalforge.app
                   - name: container
