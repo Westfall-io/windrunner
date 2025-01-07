@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "windrunner"
-version = "0.1.0"
+version = "0.2.0"
 description = "Central Argo Sensor to kickoff workflow"
 authors = ["Christopher Cox"]
 license = "MIT"
@@ -61,7 +61,7 @@ patch_tags = [
 
 [project]
 name = "windrunner"
-version = "0.1.0"
+version = "0.2.0"
 authors = [
   { name="Christopher Cox", email="chris.cox@westfall.io" },
 ]

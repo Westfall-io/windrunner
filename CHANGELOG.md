@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.2.0 (2025-01-07)
+
+### :sparkles:
+
+* :sparkles: Migrating from minikube version to fully hosted k8s ([`12396a3`](https://github.com/Westfall-io/windrunner/commit/12396a3c9a7aa5e58919fbd105fe19d5beadb9f7))
+
 ## v0.1.0 (2025-01-07)
 
 ### :sparkles:
