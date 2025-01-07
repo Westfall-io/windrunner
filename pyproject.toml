@@ -1,7 +1,7 @@
 [tool.poetry]
-name = "windripper"
+name = "windrunner"
 version = "0.0.9"
-description = "Argo Sensor for Harbor Containers"
+description = "Central Argo Sensor to kickoff workflow"
 authors = ["Christopher Cox"]
 license = "MIT"
 readme = "README.md"
@@ -56,16 +56,16 @@ patch_tags = [
 #build_command = "pip install poetry && poetry build"
 
 [project.urls]
-"Homepage" = "https://github.com/Westfall-io/windripper"
-"Bug Tracker" = "https://github.com/Westfall-io/windripper/issues"
+"Homepage" = "https://github.com/Westfall-io/windrunner"
+"Bug Tracker" = "https://github.com/Westfall-io/windrunner/issues"
 
 [project]
-name = "windripper"
+name = "windrunner"
 version = "0.0.9"
 authors = [
   { name="Christopher Cox", email="chris.cox@westfall.io" },
 ]
-description = "Windripper"
+description = "Windrunner"
 readme = "README.md"
 requires-python = ">=3.9"
 classifiers = [

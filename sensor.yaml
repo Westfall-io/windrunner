@@ -36,9 +36,9 @@ spec:
                   - name: windrunner-imagetag
                     value: v0.0.9
                   - name: windbound-imagetag
-                    value: v0.0.5
+                    value: v0.0.21
                   - name: windchest-imagetag
-                    value: v0.0.1
+                    value: v0.0.28
                   - name: container-host
                     value: harbor.digitalforge.app
                   - name: container
@@ -167,6 +167,18 @@ spec:
                         secretKeyRef:
                           name: keycloakparams
                           key: realm
+                    - name: GITUSER
+                      valueFrom:
+                        secretKeyRef:
+                          name: gitparams
+                          key: username
+                    - name: GITPASS
+                      valueFrom:
+                        secretKeyRef:
+                          name: gitparams
+                          key: config-pw
+                    - name: MINIOHOST
+                      value: minio.minio:9000
 
                 - name: main
                   inputs:
@@ -192,6 +204,34 @@ spec:
                     volumeMounts:                     # same syntax as k8s Pod spec
                     - name: workdir
                       mountPath: /mnt/vol
+                    env:
+                    - name: MINIOUSER
+                      valueFrom:
+                        secretKeyRef:
+                          name: minioparams
+                          key: wcuser
+                    - name: MINIOTOKEN
+                      valueFrom:
+                        secretKeyRef:
+                          name: minioparams
+                          key: wcpass
+                    - name: WINDSTORMAPICLIENT
+                      valueFrom:
+                        secretKeyRef:
+                          name: keycloakparams
+                          key: windstormapiclient
+                    - name: WINDSTORMAPISECRET
+                      valueFrom:
+                        secretKeyRef:
+                          name: keycloakparams
+                          key: windstormapisecret
+                    - name: MINIOHOST
+                      value: minio.minio:9000
+                    - name: KEYCLOAKREALM
+                      valueFrom:
+                        secretKeyRef:
+                          name: keycloakparams
+                          key: realm
 
           parameters:
             - src:
