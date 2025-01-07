@@ -1,10 +1,20 @@
 # CHANGELOG
 
+## v0.1.0 (2025-01-07)
+
+### :sparkles:
+
+* :sparkles: Support for minikube ([`f4bb7e0`](https://github.com/Westfall-io/windrunner/commit/f4bb7e0d90447e214eb9fba1c36d7fdf15946123))
+
 ## v0.0.9 (2024-12-03)
 
 ### :bug:
 
 * :bug: Fixing an issue pulling from harbor api ([`76aaad7`](https://github.com/Westfall-io/windrunner/commit/76aaad76818e4138a75cd198d219b65fdb25d357))
+
+### Other
+
+* :bento: Updating submodule ([`03f756e`](https://github.com/Westfall-io/windrunner/commit/03f756ed278859affdcac569c31a6e8124ec62bd))
 
 ## v0.0.8 (2024-12-03)
 
