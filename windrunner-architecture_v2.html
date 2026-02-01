@@ -1,0 +1,1482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Windrunner - System Architecture & Design Documentation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        nav {
+            background: #2c3e50;
+            padding: 15px 40px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        nav ul {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+        }
+        
+        nav a {
+            color: white;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        nav a:hover {
+            color: #3498db;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        section {
+            margin-bottom: 60px;
+        }
+        
+        h2 {
+            color: #667eea;
+            font-size: 2em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+        
+        h3 {
+            color: #764ba2;
+            font-size: 1.5em;
+            margin: 30px 0 15px 0;
+        }
+        
+        h4 {
+            color: #555;
+            font-size: 1.2em;
+            margin: 20px 0 10px 0;
+        }
+        
+        .diagram-container {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 30px;
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+        
+        svg {
+            max-width: 100%;
+            height: auto;
+        }
+        
+        .code-block {
+            background: #282c34;
+            color: #abb2bf;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        .warning-box {
+            background: #fff3e0;
+            border-left: 4px solid #ff9800;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background-color: #667eea;
+            color: white;
+        }
+        
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 20px 0;
+        }
+        
+        .card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .component-box {
+            background: #f0f4ff;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        
+        ul.features {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        ul.features li:before {
+            content: "✓ ";
+            color: #4caf50;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+            
+            nav ul {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌪️ Windrunner</h1>
+            <p>Harbor Container Metadata Extraction & Workflow Orchestration System</p>
+            <p style="font-size: 0.9em; margin-top: 10px;">System Architecture & Design Documentation</p>
+        </header>
+        
+        <nav>
+            <ul>
+                <li><a href="#overview">Overview</a></li>
+                <li><a href="#sysml">SysML v2 Model</a></li>
+                <li><a href="#architecture">Architecture</a></li>
+                <li><a href="#deployment">Deployment</a></li>
+                <li><a href="#sequences">Sequences</a></li>
+                <li><a href="#components">Components</a></li>
+            </ul>
+        </nav>
+        
+        <div class="content">
+            <!-- OVERVIEW SECTION -->
+            <section id="overview">
+                <h2>System Overview</h2>
+                
+                <div class="info-box">
+                    <h3>Purpose</h3>
+                    <p>Windrunner is a containerized utility designed to extract metadata from Harbor container registries, resolve platform-specific image configurations, and persist runtime parameters for downstream workflow execution within Kubernetes-based Argo Workflows.</p>
+                </div>
+                
+                <h3>Key Capabilities</h3>
+                <div class="grid-2">
+                    <div class="card">
+                        <h4>Registry Integration</h4>
+                        <ul class="features">
+                            <li>Connect to Harbor registry via REST API</li>
+                            <li>Authenticate with configurable credentials</li>
+                            <li>Fetch artifact metadata by project/repo/tag</li>
+                            <li>Support multi-platform manifest resolution</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="card">
+                        <h4>Configuration Extraction</h4>
+                        <ul class="features">
+                            <li>Parse container image configuration blobs</li>
+                            <li>Extract WorkingDir, Cmd, and Args</li>
+                            <li>Validate configuration compatibility</li>
+                            <li>Persist to shared volume for workflows</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="card">
+                        <h4>Workflow Orchestration</h4>
+                        <ul class="features">
+                            <li>Event-driven workflow triggering via webhooks</li>
+                            <li>Multi-stage Argo Workflow execution</li>
+                            <li>Volume management with lifecycle controls</li>
+                            <li>Integration with MinIO, Keycloak, Git</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="card">
+                        <h4>Deployment Features</h4>
+                        <ul class="features">
+                            <li>Docker containerized Python application</li>
+                            <li>Kubernetes-native deployment model</li>
+                            <li>Persistent volume claim management</li>
+                            <li>Automatic cleanup and TTL controls</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <h3>System Context</h3>
+                <p>Windrunner operates as part of a larger Digital Forge platform ecosystem, serving as the initial stage in a multi-component workflow pipeline that includes:</p>
+                <ul style="margin-left: 30px; margin-top: 10px;">
+                    <li><strong>Windrunner:</strong> Image metadata extraction and configuration preparation</li>
+                    <li><strong>Windbound:</strong> Artifact retrieval and S3 upload management</li>
+                    <li><strong>Windchest:</strong> Post-execution cleanup and result archival</li>
+                </ul>
+            </section>
+            
+            <!-- SYSML V2 MODEL SECTION -->
+            <section id="sysml">
+                <h2>SysML v2 Model</h2>
+                
+                <h3>Package Structure</h3>
+                <div class="code-block">
+package Windrunner {
+    
+    // ========== REQUIREMENTS ==========
+    package Requirements {
+        requirement def FunctionalRequirements {
+            doc /* Top-level functional requirements for Windrunner */
+            
+            requirement HarborIntegration {
+                id = "FR-001"
+                doc /* System shall integrate with Harbor Registry API v2.0 */
+                
+                requirement AuthenticateToHarbor {
+                    id = "FR-001.1"
+                    doc /* Authenticate using configurable credentials */
+                }
+                
+                requirement FetchArtifactMetadata {
+                    id = "FR-001.2"
+                    doc /* Retrieve artifact metadata by project/repo/tag */
+                }
+                
+                requirement ResolveLinuxDigest {
+                    id = "FR-001.3"
+                    doc /* Resolve platform-specific (linux/amd64) manifest digest */
+                }
+            }
+            
+            requirement ConfigurationExtraction {
+                id = "FR-002"
+                doc /* System shall extract container configuration from image blobs */
+                
+                requirement ParseImageConfig {
+                    id = "FR-002.1"
+                    doc /* Parse configuration blob from Harbor response */
+                }
+                
+                requirement ExtractRuntimeParams {
+                    id = "FR-002.2"
+                    doc /* Extract WorkingDir, Cmd, and Args from config */
+                }
+                
+                requirement ValidateConfiguration {
+                    id = "FR-002.3"
+                    doc /* Validate configuration for unsupported features (Entrypoint) */
+                }
+            }
+            
+            requirement DataPersistence {
+                id = "FR-003"
+                doc /* System shall persist extracted configuration to volume */
+                
+                requirement WriteWorkingDir {
+                    id = "FR-003.1"
+                    doc /* Write WorkingDir to path.txt */
+                }
+                
+                requirement WriteCommand {
+                    id = "FR-003.2"
+                    doc /* Write first Cmd element to cmd.txt */
+                }
+                
+                requirement WriteArguments {
+                    id = "FR-003.3"
+                    doc /* Write remaining Cmd elements as JSON array to args.txt */
+                }
+            }
+        }
+        
+        requirement def NonFunctionalRequirements {
+            doc /* Quality attributes and constraints */
+            
+            requirement Performance {
+                id = "NFR-001"
+                doc /* Startup and execution time constraints */
+                text = "Complete metadata extraction within 30 seconds"
+            }
+            
+            requirement Reliability {
+                id = "NFR-002"
+                doc /* Error handling and validation */
+                text = "Validate all API responses and fail gracefully on errors"
+            }
+            
+            requirement Compatibility {
+                id = "NFR-003"
+                doc /* Platform and version compatibility */
+                text = "Support Harbor API v2.0+ and Python 3.11+"
+            }
+            
+            requirement Security {
+                id = "NFR-004"
+                doc /* Credential management and access control */
+                text = "Support environment-based credential configuration"
+            }
+        }
+    }
+    
+    // ========== STRUCTURAL MODEL ==========
+    package Structure {
+        
+        // ===== Parts and Components =====
+        part def WindrunnerSystem {
+            doc /* Main system component */
+            
+            part mainModule : MainExecutionModule;
+            part envConfig : EnvironmentConfiguration;
+            part harborClient : HarborClientInterface;
+            part volumeManager : VolumeManager;
+            
+            // Connections
+            connect mainModule.config to envConfig;
+            connect mainModule.harbor to harborClient;
+            connect mainModule.storage to volumeManager;
+        }
+        
+        part def MainExecutionModule {
+            doc /* Core application logic - main.py */
+            
+            attribute startTime : Real;
+            
+            port config : ConfigurationPort;
+            port harbor : HarborAPIPort;
+            port storage : StoragePort;
+            
+            // Functions
+            perform action checkForUnhandledConfig;
+            perform action storeContainerConfig;
+            perform action main;
+        }
+        
+        part def EnvironmentConfiguration {
+            doc /* Environment-derived configuration - env.py */
+            
+            attribute VOLUME : String = "/mnt/vol";
+            attribute HARBORHOST : String;
+            attribute HARBORUSER : String;
+            attribute HARBORPASS : String;
+        }
+        
+        part def HarborClientInterface {
+            doc /* Harbor API client wrapper - windbinder package */
+            
+            perform action getArtifact;
+            perform action getLinuxDigest;
+            perform action getConfig;
+        }
+        
+        part def VolumeManager {
+            doc /* Persistent volume management */
+            
+            attribute volumePath : String;
+            attribute digitalforgePath : String;
+            
+            perform action createDirectory;
+            perform action writeFile;
+        }
+        
+        // ===== Ports and Interfaces =====
+        port def ConfigurationPort {
+            in attribute volume : String;
+            in attribute harborHost : String;
+            in attribute harborUser : String;
+            in attribute harborPass : String;
+        }
+        
+        port def HarborAPIPort {
+            out message requestArtifact;
+            in message artifactResponse;
+            out message requestConfig;
+            in message configResponse;
+        }
+        
+        port def StoragePort {
+            out message writePathTxt;
+            out message writeCmdTxt;
+            out message writeArgsTxt;
+        }
+    }
+    
+    // ========== BEHAVIORAL MODEL ==========
+    package Behavior {
+        
+        // ===== Use Cases =====
+        use case def ExtractImageMetadata {
+            doc /* Primary use case: Extract and persist container metadata */
+            
+            subject system : WindrunnerSystem;
+            actor user : WorkflowOrchestrator;
+            
+            objective {
+                doc /* Retrieve image configuration and persist for workflow use */
+            }
+            
+            include use case AuthenticateToHarbor;
+            include use case FetchArtifactData;
+            include use case ResolveDigest;
+            include use case ExtractConfiguration;
+            include use case PersistToVolume;
+        }
+        
+        use case def AuthenticateToHarbor;
+        use case def FetchArtifactData;
+        use case def ResolveDigest;
+        use case def ExtractConfiguration;
+        use case def PersistToVolume;
+        
+        // ===== State Machine =====
+        state def WindrunnerExecutionStates {
+            entry state Idle;
+            
+            state Initializing {
+                entry action loadEnvironmentConfig;
+                entry action createVolumeDirectory;
+            }
+            
+            state FetchingMetadata {
+                state BuildingURL;
+                state CallingHarborAPI;
+                state ParsingResponse;
+            }
+            
+            state ResolvingDigest {
+                entry action getLinuxDigest;
+            }
+            
+            state FetchingConfig {
+                state BuildingConfigURL;
+                state RetrievingConfigBlob;
+                state ParsingConfig;
+            }
+            
+            state ValidatingConfig {
+                entry action checkForEntrypoint;
+                do action validateRequiredFields;
+            }
+            
+            state PersistingData {
+                state WritingWorkingDir;
+                state WritingCommand;
+                state WritingArguments;
+            }
+            
+            accept state Completed;
+            accept state Failed;
+            
+            transition Idle to Initializing;
+            transition Initializing to FetchingMetadata;
+            transition FetchingMetadata to ResolvingDigest;
+            transition ResolvingDigest to FetchingConfig;
+            transition FetchingConfig to ValidatingConfig;
+            transition ValidatingConfig to PersistingData
+                when (configValid);
+            transition ValidatingConfig to Failed
+                when (configInvalid);
+            transition PersistingData to Completed;
+        }
+        
+        // ===== Activities =====
+        action def main {
+            in proj : String;
+            in repo : String;
+            in tag : String;
+            out success : Boolean;
+            
+            // Sequential flow
+            first start;
+            then action buildArtifactURL;
+            then action fetchArtifact;
+            then action resolveLinuxDigest;
+            then action buildConfigURL;
+            then action fetchConfigBlob;
+            then action validateConfig;
+            then action persistConfig;
+            then done;
+        }
+        
+        action def buildArtifactURL {
+            in domain : String;
+            in proj : String;
+            in repo : String;
+            in tag : String;
+            out url : String;
+        }
+        
+        action def fetchArtifact {
+            in url : String;
+            out artifactData : JSON;
+        }
+        
+        action def resolveLinuxDigest {
+            in artifactData : JSON;
+            out linuxDigest : String;
+        }
+        
+        action def validateConfig {
+            in config : JSON;
+            out valid : Boolean;
+            
+            assert constraint NoEntrypointAllowed {
+                doc /* Configuration must not contain Entrypoint */
+                !config.hasKey("entrypoint") and !config.hasKey("Entrypoint")
+            }
+        }
+    }
+    
+    // ========== ALLOCATION & DEPLOYMENT ==========
+    package Deployment {
+        
+        part def KubernetesCluster {
+            part argoWorkflow : ArgoWorkflowEngine;
+            part argoEvents : ArgoEventEngine;
+            part harbor : HarborRegistry;
+            part minio : MinIOObjectStorage;
+        }
+        
+        part def ArgoWorkflowEngine {
+            part sensor : WindrunnerSensor;
+            part workflow : WindrunnerWorkflow {
+                part initVolume : InitVolumeContainer;
+                part cpVolume : CopyVolumeContainer;
+                part prepVolume : PrepVolumeContainer;
+                part runMain : MainExecutionContainer;
+                part cleanup : CleanupContainer;
+            }
+        }
+        
+        part def InitVolumeContainer {
+            doc /* Runs Windrunner to extract metadata */
+            
+            attribute image : String = "westfallio/windrunner";
+            attribute command : String[] = ["python", "src/main.py"];
+            
+            part volumeMount : VolumeMount {
+                attribute name = "workdir";
+                attribute mountPath = "/mnt/vol";
+            }
+        }
+        
+        allocation def SystemAllocation {
+            allocate WindrunnerSystem to InitVolumeContainer;
+            allocate MainExecutionModule to InitVolumeContainer;
+        }
+    }
+    
+    // ========== PARAMETRICS ==========
+    package Parametrics {
+        
+        constraint def VolumeCapacity {
+            attribute requestedStorage : Real;
+            attribute availableStorage : Real;
+            requestedStorage <= availableStorage
+        }
+        
+        constraint def ExecutionTime {
+            attribute actualTime : Real;
+            attribute maxTime : Real = 86400.0; // 24 hours
+            actualTime <= maxTime
+        }
+    }
+}
+                </div>
+                
+                <div class="info-box">
+                    <h4>SysML v2 Model Notes</h4>
+                    <p>This model captures the complete system specification including:</p>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li><strong>Requirements:</strong> Functional and non-functional requirements with hierarchical decomposition</li>
+                        <li><strong>Structure:</strong> Part definitions, port interfaces, and component connections</li>
+                        <li><strong>Behavior:</strong> Use cases, state machines, and activity flows</li>
+                        <li><strong>Deployment:</strong> Kubernetes allocation model and container mappings</li>
+                        <li><strong>Parametrics:</strong> Constraints on resources and performance</li>
+                    </ul>
+                </div>
+            </section>
+            
+            <!-- ARCHITECTURE SECTION -->
+            <section id="architecture">
+                <h2>High-Level Architecture</h2>
+                
+                <h3>Physical Architecture</h3>
+                <div class="diagram-container">
+                    <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Kubernetes Cluster -->
+                        <rect x="50" y="50" width="1100" height="700" fill="#e8f4f8" stroke="#0288d1" stroke-width="3" rx="10"/>
+                        <text x="600" y="85" text-anchor="middle" font-size="24" font-weight="bold" fill="#0288d1">Kubernetes Cluster</text>
+                        
+                        <!-- Argo Events Section -->
+                        <rect x="100" y="120" width="480" height="250" fill="#fff3e0" stroke="#ff9800" stroke-width="2" rx="8"/>
+                        <text x="340" y="150" text-anchor="middle" font-size="18" font-weight="bold" fill="#ff9800">Argo Events</text>
+                        
+                        <!-- EventSource -->
+                        <rect x="130" y="170" width="200" height="80" fill="#ffffff" stroke="#ff9800" stroke-width="2" rx="5"/>
+                        <text x="230" y="200" text-anchor="middle" font-size="14" font-weight="bold">EventSource</text>
+                        <text x="230" y="220" text-anchor="middle" font-size="12">Webhook</text>
+                        <text x="230" y="235" text-anchor="middle" font-size="11" fill="#666">Port: 12000</text>
+                        
+                        <!-- Sensor -->
+                        <rect x="130" y="270" width="200" height="80" fill="#ffffff" stroke="#ff9800" stroke-width="2" rx="5"/>
+                        <text x="230" y="300" text-anchor="middle" font-size="14" font-weight="bold">Sensor</text>
+                        <text x="230" y="320" text-anchor="middle" font-size="12">windrunner-sensor</text>
+                        
+                        <!-- Argo Workflows Section -->
+                        <rect x="620" y="120" width="480" height="600" fill="#e8eaf6" stroke="#673ab7" stroke-width="2" rx="8"/>
+                        <text x="860" y="150" text-anchor="middle" font-size="18" font-weight="bold" fill="#673ab7">Argo Workflow</text>
+                        
+                        <!-- Workflow Steps -->
+                        <g id="workflow-steps">
+                            <!-- Step 1: Init Volume -->
+                            <rect x="650" y="180" width="180" height="70" fill="#ffffff" stroke="#667eea" stroke-width="2" rx="5"/>
+                            <text x="740" y="205" text-anchor="middle" font-size="13" font-weight="bold">1. init-volume</text>
+                            <text x="740" y="225" text-anchor="middle" font-size="11" fill="#666">Windrunner</text>
+                            <text x="740" y="240" text-anchor="middle" font-size="10" fill="#888">Extract metadata</text>
+                            
+                            <!-- Step 2: Copy Volume -->
+                            <rect x="650" y="270" width="180" height="70" fill="#ffffff" stroke="#667eea" stroke-width="2" rx="5"/>
+                            <text x="740" y="295" text-anchor="middle" font-size="13" font-weight="bold">2. cp-volume</text>
+                            <text x="740" y="315" text-anchor="middle" font-size="11" fill="#666">Target Container</text>
+                            <text x="740" y="330" text-anchor="middle" font-size="10" fill="#888">Copy workspace</text>
+                            
+                            <!-- Step 3: Prep Volume -->
+                            <rect x="650" y="360" width="180" height="70" fill="#ffffff" stroke="#667eea" stroke-width="2" rx="5"/>
+                            <text x="740" y="385" text-anchor="middle" font-size="13" font-weight="bold">3. prep-volume-s3</text>
+                            <text x="740" y="405" text-anchor="middle" font-size="11" fill="#666">Windbound</text>
+                            <text x="740" y="420" text-anchor="middle" font-size="10" fill="#888">Fetch artifacts</text>
+                            
+                            <!-- Step 4: Run Main -->
+                            <rect x="650" y="450" width="180" height="70" fill="#ffffff" stroke="#667eea" stroke-width="2" rx="5"/>
+                            <text x="740" y="475" text-anchor="middle" font-size="13" font-weight="bold">4. run-main</text>
+                            <text x="740" y="495" text-anchor="middle" font-size="11" fill="#666">Execute Container</text>
+                            <text x="740" y="510" text-anchor="middle" font-size="10" fill="#888">Run workload</text>
+                            
+                            <!-- Step 5: Cleanup -->
+                            <rect x="650" y="540" width="180" height="70" fill="#ffffff" stroke="#667eea" stroke-width="2" rx="5"/>
+                            <text x="740" y="565" text-anchor="middle" font-size="13" font-weight="bold">5. volume-cleanup</text>
+                            <text x="740" y="585" text-anchor="middle" font-size="11" fill="#666">Windchest</text>
+                            <text x="740" y="600" text-anchor="middle" font-size="10" fill="#888">Archive & cleanup</text>
+                        </g>
+                        
+                        <!-- Shared Volume -->
+                        <rect x="870" y="180" width="200" height="100" fill="#c8e6c9" stroke="#4caf50" stroke-width="2" rx="5"/>
+                        <text x="970" y="210" text-anchor="middle" font-size="14" font-weight="bold">Persistent Volume</text>
+                        <text x="970" y="230" text-anchor="middle" font-size="11" fill="#666">workdir PVC</text>
+                        <text x="970" y="250" text-anchor="middle" font-size="10" fill="#666">Size: 1Gi</text>
+                        <text x="970" y="265" text-anchor="middle" font-size="10" fill="#666">Access: RWO</text>
+                        
+                        <!-- External Systems -->
+                        <g id="external-systems">
+                            <!-- Harbor -->
+                            <rect x="100" y="420" width="200" height="100" fill="#ffebee" stroke="#f44336" stroke-width="2" rx="5"/>
+                            <text x="200" y="450" text-anchor="middle" font-size="14" font-weight="bold">Harbor Registry</text>
+                            <text x="200" y="470" text-anchor="middle" font-size="11" fill="#666">Container Images</text>
+                            <text x="200" y="490" text-anchor="middle" font-size="10" fill="#666">API: v2.0</text>
+                            <text x="200" y="505" text-anchor="middle" font-size="10" fill="#666">Auth: Basic</text>
+                            
+                            <!-- MinIO -->
+                            <rect x="100" y="550" width="200" height="100" fill="#fff9c4" stroke="#fbc02d" stroke-width="2" rx="5"/>
+                            <text x="200" y="580" text-anchor="middle" font-size="14" font-weight="bold">MinIO</text>
+                            <text x="200" y="600" text-anchor="middle" font-size="11" fill="#666">Object Storage</text>
+                            <text x="200" y="620" text-anchor="middle" font-size="10" fill="#666">S3-compatible</text>
+                            <text x="200" y="635" text-anchor="middle" font-size="10" fill="#666">Port: 9000</text>
+                            
+                            <!-- Keycloak -->
+                            <rect x="350" y="420" width="200" height="100" fill="#f3e5f5" stroke="#9c27b0" stroke-width="2" rx="5"/>
+                            <text x="450" y="450" text-anchor="middle" font-size="14" font-weight="bold">Keycloak</text>
+                            <text x="450" y="470" text-anchor="middle" font-size="11" fill="#666">Authentication</text>
+                            <text x="450" y="490" text-anchor="middle" font-size="10" fill="#666">OIDC/OAuth2</text>
+                            
+                            <!-- Git -->
+                            <rect x="350" y="550" width="200" height="100" fill="#e0f2f1" stroke="#009688" stroke-width="2" rx="5"/>
+                            <text x="450" y="580" text-anchor="middle" font-size="14" font-weight="bold">Git Repository</text>
+                            <text x="450" y="600" text-anchor="middle" font-size="11" fill="#666">Source Control</text>
+                            <text x="450" y="620" text-anchor="middle" font-size="10" fill="#666">Artifact Storage</text>
+                        </g>
+                        
+                        <!-- Arrows -->
+                        <defs>
+                            <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                                <polygon points="0 0, 10 3, 0 6" fill="#333" />
+                            </marker>
+                        </defs>
+                        
+                        <!-- Webhook to Sensor -->
+                        <line x1="230" y1="250" x2="230" y2="270" stroke="#ff9800" stroke-width="2" marker-end="url(#arrowhead)"/>
+                        
+                        <!-- Sensor to Workflow -->
+                        <path d="M 330 310 Q 490 310 620 215" fill="none" stroke="#673ab7" stroke-width="2" marker-end="url(#arrowhead)"/>
+                        
+                        <!-- Workflow steps flow -->
+                        <line x1="740" y1="250" x2="740" y2="270" stroke="#667eea" stroke-width="2" marker-end="url(#arrowhead)"/>
+                        <line x1="740" y1="340" x2="740" y2="360" stroke="#667eea" stroke-width="2" marker-end="url(#arrowhead)"/>
+                        <line x1="740" y1="430" x2="740" y2="450" stroke="#667eea" stroke-width="2" marker-end="url(#arrowhead)"/>
+                        <line x1="740" y1="520" x2="740" y2="540" stroke="#667eea" stroke-width="2" marker-end="url(#arrowhead)"/>
+                        
+                        <!-- External connections -->
+                        <path d="M 300 470 Q 550 470 650 215" fill="none" stroke="#f44336" stroke-width="2" stroke-dasharray="5,5" marker-end="url(#arrowhead)"/>
+                        <path d="M 300 600 Q 550 600 650 575" fill="none" stroke="#fbc02d" stroke-width="2" stroke-dasharray="5,5" marker-end="url(#arrowhead)"/>
+                        <path d="M 550 470 Q 600 400 650 395" fill="none" stroke="#9c27b0" stroke-width="2" stroke-dasharray="5,5" marker-end="url(#arrowhead)"/>
+                    </svg>
+                </div>
+                
+                <h3>Functional Architecture</h3>
+                <div class="diagram-container">
+                    <svg viewBox="0 0 1000 700" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Layer 1: Trigger Layer -->
+                        <rect x="50" y="50" width="900" height="120" fill="#fff3e0" stroke="#ff9800" stroke-width="2" rx="5"/>
+                        <text x="500" y="80" text-anchor="middle" font-size="16" font-weight="bold" fill="#ff9800">Event Trigger Layer</text>
+                        
+                        <rect x="100" y="100" width="200" height="50" fill="#ffffff" stroke="#ff9800" stroke-width="1.5" rx="3"/>
+                        <text x="200" y="130" text-anchor="middle" font-size="13">HTTP Webhook</text>
+                        
+                        <rect x="350" y="100" width="200" height="50" fill="#ffffff" stroke="#ff9800" stroke-width="1.5" rx="3"/>
+                        <text x="450" y="130" text-anchor="middle" font-size="13">Event Validation</text>
+                        
+                        <rect x="600" y="100" width="250" height="50" fill="#ffffff" stroke="#ff9800" stroke-width="1.5" rx="3"/>
+                        <text x="725" y="130" text-anchor="middle" font-size="13">Workflow Instantiation</text>
+                        
+                        <!-- Layer 2: Orchestration Layer -->
+                        <rect x="50" y="200" width="900" height="120" fill="#e8eaf6" stroke="#673ab7" stroke-width="2" rx="5"/>
+                        <text x="500" y="230" text-anchor="middle" font-size="16" font-weight="bold" fill="#673ab7">Workflow Orchestration Layer</text>
+                        
+                        <rect x="100" y="250" width="180" height="50" fill="#ffffff" stroke="#673ab7" stroke-width="1.5" rx="3"/>
+                        <text x="190" y="280" text-anchor="middle" font-size="12">Volume Provisioning</text>
+                        
+                        <rect x="310" y="250" width="180" height="50" fill="#ffffff" stroke="#673ab7" stroke-width="1.5" rx="3"/>
+                        <text x="400" y="280" text-anchor="middle" font-size="12">Step Sequencing</text>
+                        
+                        <rect x="520" y="250" width="180" height="50" fill="#ffffff" stroke="#673ab7" stroke-width="1.5" rx="3"/>
+                        <text x="610" y="280" text-anchor="middle" font-size="12">Resource Allocation</text>
+                        
+                        <rect x="730" y="250" width="120" height="50" fill="#ffffff" stroke="#673ab7" stroke-width="1.5" rx="3"/>
+                        <text x="790" y="280" text-anchor="middle" font-size="12">Lifecycle Mgmt</text>
+                        
+                        <!-- Layer 3: Execution Layer -->
+                        <rect x="50" y="350" width="900" height="150" fill="#e3f2fd" stroke="#2196f3" stroke-width="2" rx="5"/>
+                        <text x="500" y="380" text-anchor="middle" font-size="16" font-weight="bold" fill="#2196f3">Container Execution Layer</text>
+                        
+                        <rect x="80" y="400" width="150" height="80" fill="#ffffff" stroke="#667eea" stroke-width="1.5" rx="3"/>
+                        <text x="155" y="425" text-anchor="middle" font-size="12" font-weight="bold">Windrunner</text>
+                        <text x="155" y="445" text-anchor="middle" font-size="10">Metadata</text>
+                        <text x="155" y="460" text-anchor="middle" font-size="10">Extraction</text>
+                        
+                        <rect x="260" y="400" width="150" height="80" fill="#ffffff" stroke="#667eea" stroke-width="1.5" rx="3"/>
+                        <text x="335" y="425" text-anchor="middle" font-size="12" font-weight="bold">Windbound</text>
+                        <text x="335" y="445" text-anchor="middle" font-size="10">Artifact</text>
+                        <text x="335" y="460" text-anchor="middle" font-size="10">Retrieval</text>
+                        
+                        <rect x="440" y="400" width="150" height="80" fill="#ffffff" stroke="#667eea" stroke-width="1.5" rx="3"/>
+                        <text x="515" y="425" text-anchor="middle" font-size="12" font-weight="bold">Target</text>
+                        <text x="515" y="445" text-anchor="middle" font-size="10">Container</text>
+                        <text x="515" y="460" text-anchor="middle" font-size="10">Execution</text>
+                        
+                        <rect x="620" y="400" width="150" height="80" fill="#ffffff" stroke="#667eea" stroke-width="1.5" rx="3"/>
+                        <text x="695" y="425" text-anchor="middle" font-size="12" font-weight="bold">Windchest</text>
+                        <text x="695" y="445" text-anchor="middle" font-size="10">Result</text>
+                        <text x="695" y="460" text-anchor="middle" font-size="10">Archival</text>
+                        
+                        <rect x="800" y="400" width="130" height="80" fill="#ffffff" stroke="#667eea" stroke-width="1.5" rx="3"/>
+                        <text x="865" y="425" text-anchor="middle" font-size="12" font-weight="bold">Volume</text>
+                        <text x="865" y="445" text-anchor="middle" font-size="10">Copy</text>
+                        
+                        <!-- Layer 4: Integration Layer -->
+                        <rect x="50" y="530" width="900" height="120" fill="#f1f8e9" stroke="#8bc34a" stroke-width="2" rx="5"/>
+                        <text x="500" y="560" text-anchor="middle" font-size="16" font-weight="bold" fill="#689f38">External Integration Layer</text>
+                        
+                        <rect x="100" y="580" width="150" height="50" fill="#ffffff" stroke="#8bc34a" stroke-width="1.5" rx="3"/>
+                        <text x="175" y="610" text-anchor="middle" font-size="12">Harbor API</text>
+                        
+                        <rect x="280" y="580" width="150" height="50" fill="#ffffff" stroke="#8bc34a" stroke-width="1.5" rx="3"/>
+                        <text x="355" y="610" text-anchor="middle" font-size="12">MinIO S3</text>
+                        
+                        <rect x="460" y="580" width="150" height="50" fill="#ffffff" stroke="#8bc34a" stroke-width="1.5" rx="3"/>
+                        <text x="535" y="610" text-anchor="middle" font-size="12">Keycloak Auth</text>
+                        
+                        <rect x="640" y="580" width="150" height="50" fill="#ffffff" stroke="#8bc34a" stroke-width="1.5" rx="3"/>
+                        <text x="715" y="610" text-anchor="middle" font-size="12">Git Repos</text>
+                        
+                        <!-- Arrows between layers -->
+                        <defs>
+                            <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                                <polygon points="0 0, 10 3, 0 6" fill="#333" />
+                            </marker>
+                        </defs>
+                        
+                        <line x1="500" y1="170" x2="500" y2="200" stroke="#333" stroke-width="2" marker-end="url(#arrow)"/>
+                        <line x1="500" y1="320" x2="500" y2="350" stroke="#333" stroke-width="2" marker-end="url(#arrow)"/>
+                        <line x1="500" y1="500" x2="500" y2="530" stroke="#333" stroke-width="2" marker-end="url(#arrow)"/>
+                    </svg>
+                </div>
+                
+                <h3>Component Diagram</h3>
+                <div class="component-box">
+                    <h4>Windrunner Core Components</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Component</th>
+                                <th>Module</th>
+                                <th>Responsibility</th>
+                                <th>Dependencies</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Main Execution</strong></td>
+                                <td>main.py</td>
+                                <td>CLI entrypoint, orchestrates metadata extraction flow</td>
+                                <td>env.py, windbinder, fire, os</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Environment Config</strong></td>
+                                <td>env.py</td>
+                                <td>Centralize environment-derived configuration values</td>
+                                <td>os</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Harbor Client</strong></td>
+                                <td>windbinder.harbor.artifact</td>
+                                <td>Harbor API interaction (get_artifact, get_linux_digest, get_config)</td>
+                                <td>docker, requests</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Config Validator</strong></td>
+                                <td>main.check_for_unhandled_config()</td>
+                                <td>Validate container config for unsupported features</td>
+                                <td>None</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Storage Manager</strong></td>
+                                <td>main.store_container_config()</td>
+                                <td>Persist WorkingDir, Cmd, Args to volume files</td>
+                                <td>os, json</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+            
+            <!-- DEPLOYMENT SECTION -->
+            <section id="deployment">
+                <h2>Deployment Design</h2>
+                
+                <h3>Container Deployment Model</h3>
+                <div class="diagram-container">
+                    <svg viewBox="0 0 1000 600" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Docker Host -->
+                        <rect x="50" y="50" width="900" height="500" fill="#eceff1" stroke="#546e7a" stroke-width="3" rx="10"/>
+                        <text x="500" y="85" text-anchor="middle" font-size="20" font-weight="bold" fill="#546e7a">Docker / Kubernetes Node</text>
+                        
+                        <!-- Container -->
+                        <rect x="100" y="120" width="400" height="400" fill="#ffffff" stroke="#2196f3" stroke-width="2" rx="8"/>
+                        <text x="300" y="150" text-anchor="middle" font-size="16" font-weight="bold" fill="#2196f3">Windrunner Container</text>
+                        
+                        <!-- Base Image -->
+                        <rect x="130" y="170" width="340" height="60" fill="#e3f2fd" stroke="#1976d2" stroke-width="1.5" rx="5"/>
+                        <text x="300" y="195" text-anchor="middle" font-size="13" font-weight="bold">Base: python:3.11-slim</text>
+                        <text x="300" y="215" text-anchor="middle" font-size="11" fill="#666">Debian-based minimal Python</text>
+                        
+                        <!-- Dependencies Layer -->
+                        <rect x="130" y="250" width="340" height="90" fill="#fff9c4" stroke="#f9a825" stroke-width="1.5" rx="5"/>
+                        <text x="300" y="275" text-anchor="middle" font-size="13" font-weight="bold">Dependencies</text>
+                        <text x="300" y="295" text-anchor="middle" font-size="11">GitPython 3.1.37</text>
+                        <text x="300" y="310" text-anchor="middle" font-size="11">Jinja2 3.1.2</text>
+                        <text x="300" y="325" text-anchor="middle" font-size="11">minio 7.1.17, fire 0.5.0, docker 6.1.3</text>
+                        
+                        <!-- Application Layer -->
+                        <rect x="130" y="360" width="340" height="80" fill="#c8e6c9" stroke="#388e3c" stroke-width="1.5" rx="5"/>
+                        <text x="300" y="385" text-anchor="middle" font-size="13" font-weight="bold">Application Code</text>
+                        <text x="300" y="405" text-anchor="middle" font-size="11">/app/src/main.py</text>
+                        <text x="300" y="420" text-anchor="middle" font-size="11">/app/src/env.py</text>
+                        <text x="300" y="435" text-anchor="middle" font-size="11">/app/src/windbinder/</text>
+                        
+                        <!-- Runtime -->
+                        <rect x="130" y="460" width="340" height="40" fill="#ffccbc" stroke="#d84315" stroke-width="1.5" rx="5"/>
+                        <text x="300" y="485" text-anchor="middle" font-size="13" font-weight="bold">CMD: python src/main.py</text>
+                        
+                        <!-- Volume Mount -->
+                        <rect x="550" y="200" width="350" height="120" fill="#e1f5fe" stroke="#0277bd" stroke-width="2" rx="8"/>
+                        <text x="725" y="230" text-anchor="middle" font-size="14" font-weight="bold">Volume Mounts</text>
+                        <text x="725" y="255" text-anchor="middle" font-size="12">/mnt/vol → PVC workdir</text>
+                        <text x="725" y="275" text-anchor="middle" font-size="11" fill="#666">Output Files:</text>
+                        <text x="725" y="292" text-anchor="middle" font-size="10">/mnt/vol/digitalforge/path.txt</text>
+                        <text x="725" y="307" text-anchor="middle" font-size="10">/mnt/vol/digitalforge/cmd.txt</text>
+                        
+                        <!-- Environment Variables -->
+                        <rect x="550" y="340" width="350" height="180" fill="#f3e5f5" stroke="#6a1b9a" stroke-width="2" rx="8"/>
+                        <text x="725" y="370" text-anchor="middle" font-size="14" font-weight="bold">Environment Variables</text>
+                        <text x="725" y="395" text-anchor="middle" font-size="11" font-family="monospace">VOLUME=/mnt/vol</text>
+                        <text x="725" y="415" text-anchor="middle" font-size="11" font-family="monospace">HARBORHOST=harbor-core.harbor/api/v2.0</text>
+                        <text x="725" y="435" text-anchor="middle" font-size="11" font-family="monospace">HARBORUSER=admin</text>
+                        <text x="725" y="455" text-anchor="middle" font-size="11" font-family="monospace">HARBORPASS=[from secret]</text>
+                        <text x="725" y="475" text-anchor="middle" font-size="11" font-family="monospace">PYTHONUNBUFFERED=1</text>
+                        <text x="725" y="495" text-anchor="middle" font-size="11" font-family="monospace">PIP_NO_CACHE_DIR=1</text>
+                    </svg>
+                </div>
+                
+                <h3>Kubernetes Deployment Specification</h3>
+                <div class="code-block">
+# Argo Workflow Template Specification
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: windrunner-workflow-
+spec:
+  serviceAccountName: argo-events-sa
+  entrypoint: windrunner
+  
+  # TTL Strategy
+  ttlStrategy:
+    secondsAfterCompletion: 120
+    secondsAfterSuccess: 120
+    secondsAfterFailure: 120
+  
+  # Volume Claim Template
+  volumeClaimTemplates:
+  - metadata:
+      name: workdir
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 1Gi
+  
+  # Workflow Parameters
+  arguments:
+    parameters:
+    - name: windrunner-imagetag
+      value: v0.2.0
+    - name: project
+      value: python-sample-containers
+    - name: container
+      value: python-pytest-boolfile
+    - name: container-tag
+      value: latest
+  
+  # Image Pull Secrets
+  imagePullSecrets:
+  - name: harborcred
+  
+  # Templates
+  templates:
+  - name: windrunner
+    steps:
+    - - name: init-volume
+        template: init-volume
+    - - name: cp-volume
+        template: cp-volume
+    - - name: prep-volume-s3
+        template: prep-volume-s3
+    - - name: run-main
+        template: main
+        continueOn:
+          failed: true
+    - - name: volume-cleanup
+        template: volume-cleanup
+  
+  # Init Volume Container (Windrunner)
+  - name: init-volume
+    container:
+      image: "docker.io/westfallio/windrunner:{{workflow.parameters.windrunner-imagetag}}"
+      command: ["python"]
+      args: 
+      - "src/main.py"
+      - "{{workflow.parameters.project}}"
+      - "{{workflow.parameters.container}}"
+      - "{{workflow.parameters.container-tag}}"
+      volumeMounts:
+      - name: workdir
+        mountPath: /mnt/vol
+    outputs:
+      parameters:
+      - name: path
+        valueFrom:
+          path: /mnt/vol/digitalforge/path.txt
+      - name: cmd
+        valueFrom:
+          path: /mnt/vol/digitalforge/cmd.txt
+      - name: args
+        valueFrom:
+          path: /mnt/vol/digitalforge/args.txt
+                </div>
+                
+                <h3>Deployment Architecture Layers</h3>
+                <div class="grid-2">
+                    <div class="card">
+                        <h4>Infrastructure Layer</h4>
+                        <ul class="features">
+                            <li>Kubernetes cluster with Argo Workflows and Argo Events</li>
+                            <li>Persistent volume provisioner (1Gi RWO volumes)</li>
+                            <li>Container registry (Harbor) for image storage</li>
+                            <li>Service mesh for inter-service communication</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="card">
+                        <h4>Platform Services</h4>
+                        <ul class="features">
+                            <li>Harbor: Container image registry and artifact storage</li>
+                            <li>MinIO: S3-compatible object storage for data</li>
+                            <li>Keycloak: Identity and access management</li>
+                            <li>Git: Source control and artifact versioning</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="card">
+                        <h4>Orchestration Layer</h4>
+                        <ul class="features">
+                            <li>Argo Events: Event-driven workflow triggering</li>
+                            <li>Argo Workflows: DAG-based container orchestration</li>
+                            <li>Service accounts for RBAC control</li>
+                            <li>Volume lifecycle management with GC strategy</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="card">
+                        <h4>Application Layer</h4>
+                        <ul class="features">
+                            <li>Windrunner: Metadata extraction container</li>
+                            <li>Windbound: Artifact fetching and S3 upload</li>
+                            <li>Windchest: Cleanup and archival operations</li>
+                            <li>Target containers: User workload execution</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <h3>Network & Security</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Component</th>
+                            <th>Port/Protocol</th>
+                            <th>Authentication</th>
+                            <th>Encryption</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Webhook EventSource</td>
+                            <td>12000/HTTP</td>
+                            <td>None (internal)</td>
+                            <td>Optional TLS</td>
+                        </tr>
+                        <tr>
+                            <td>Harbor API</td>
+                            <td>443/HTTPS</td>
+                            <td>Basic Auth</td>
+                            <td>TLS 1.2+</td>
+                        </tr>
+                        <tr>
+                            <td>MinIO</td>
+                            <td>9000/HTTPS</td>
+                            <td>Access Key/Secret</td>
+                            <td>TLS</td>
+                        </tr>
+                        <tr>
+                            <td>Keycloak</td>
+                            <td>8080/HTTPS</td>
+                            <td>OAuth2/OIDC</td>
+                            <td>TLS</td>
+                        </tr>
+                        <tr>
+                            <td>Git Repositories</td>
+                            <td>443/HTTPS</td>
+                            <td>Token-based</td>
+                            <td>TLS</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+            
+            <!-- SEQUENCES SECTION -->
+            <section id="sequences">
+                <h2>Sequence Diagrams</h2>
+                
+                <h3>Primary Execution Flow</h3>
+                <div class="diagram-container">
+                    <svg viewBox="0 0 1100 900" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Actors -->
+                        <g id="actors">
+                            <rect x="50" y="50" width="120" height="50" fill="#667eea" stroke="#333" stroke-width="2" rx="5"/>
+                            <text x="110" y="80" text-anchor="middle" fill="white" font-weight="bold">Webhook</text>
+                            
+                            <rect x="250" y="50" width="120" height="50" fill="#667eea" stroke="#333" stroke-width="2" rx="5"/>
+                            <text x="310" y="80" text-anchor="middle" fill="white" font-weight="bold">Sensor</text>
+                            
+                            <rect x="450" y="50" width="120" height="50" fill="#667eea" stroke="#333" stroke-width="2" rx="5"/>
+                            <text x="510" y="80" text-anchor="middle" fill="white" font-weight="bold">Workflow</text>
+                            
+                            <rect x="650" y="50" width="120" height="50" fill="#667eea" stroke="#333" stroke-width="2" rx="5"/>
+                            <text x="710" y="80" text-anchor="middle" fill="white" font-weight="bold">Windrunner</text>
+                            
+                            <rect x="850" y="50" width="120" height="50" fill="#667eea" stroke="#333" stroke-width="2" rx="5"/>
+                            <text x="910" y="80" text-anchor="middle" fill="white" font-weight="bold">Harbor</text>
+                        </g>
+                        
+                        <!-- Lifelines -->
+                        <line x1="110" y1="100" x2="110" y2="850" stroke="#999" stroke-width="2" stroke-dasharray="5,5"/>
+                        <line x1="310" y1="100" x2="310" y2="850" stroke="#999" stroke-width="2" stroke-dasharray="5,5"/>
+                        <line x1="510" y1="100" x2="510" y2="850" stroke="#999" stroke-width="2" stroke-dasharray="5,5"/>
+                        <line x1="710" y1="100" x2="710" y2="850" stroke="#999" stroke-width="2" stroke-dasharray="5,5"/>
+                        <line x1="910" y1="100" x2="910" y2="850" stroke="#999" stroke-width="2" stroke-dasharray="5,5"/>
+                        
+                        <!-- Messages -->
+                        <defs>
+                            <marker id="arrowblack" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                                <polygon points="0 0, 10 3, 0 6" fill="#333" />
+                            </marker>
+                        </defs>
+                        
+                        <!-- 1. POST webhook -->
+                        <line x1="110" y1="140" x2="310" y2="140" stroke="#333" stroke-width="2" marker-end="url(#arrowblack)"/>
+                        <text x="210" y="135" text-anchor="middle" font-size="12">1: POST /windrunner</text>
+                        
+                        <!-- 2. Trigger workflow -->
+                        <line x1="310" y1="180" x2="510" y2="180" stroke="#333" stroke-width="2" marker-end="url(#arrowblack)"/>
+                        <text x="410" y="175" text-anchor="middle" font-size="12">2: submit workflow</text>
+                        
+                        <!-- 3. Create PVC -->
+                        <rect x="490" y="200" width="40" height="40" fill="#c8e6c9" stroke="#4caf50" stroke-width="2"/>
+                        <text x="30" y="225" font-size="11" fill="#666">3: Create PVC (workdir)</text>
+                        
+                        <!-- 4. Start init-volume -->
+                        <line x1="510" y1="260" x2="710" y2="260" stroke="#333" stroke-width="2" marker-end="url(#arrowblack)"/>
+                        <text x="610" y="255" text-anchor="middle" font-size="12">4: Start container</text>
+                        
+                        <!-- 5. Load env config -->
+                        <rect x="690" y="280" width="40" height="40" fill="#fff9c4" stroke="#fbc02d" stroke-width="2"/>
+                        <text x="600" y="305" font-size="11" fill="#666">5: Load env config</text>
+                        
+                        <!-- 6. Create volume dir -->
+                        <rect x="690" y="340" width="40" height="40" fill="#fff9c4" stroke="#fbc02d" stroke-width="2"/>
+                        <text x="600" y="365" font-size="11" fill="#666">6: mkdir /mnt/vol/digitalforge</text>
+                        
+                        <!-- 7. Build API URL -->
+                        <rect x="690" y="400" width="40" height="40" fill="#fff9c4" stroke="#fbc02d" stroke-width="2"/>
+                        <text x="600" y="425" font-size="11" fill="#666">7: Build artifact URL</text>
+                        
+                        <!-- 8. GET artifact -->
+                        <line x1="710" y1="460" x2="910" y2="460" stroke="#333" stroke-width="2" marker-end="url(#arrowblack)"/>
+                        <text x="810" y="455" text-anchor="middle" font-size="12">8: GET /projects/.../artifacts/tag</text>
+                        
+                        <!-- 9. Return artifact -->
+                        <line x1="910" y1="490" x2="710" y2="490" stroke="#333" stroke-width="2" stroke-dasharray="3,3" marker-end="url(#arrowblack)"/>
+                        <text x="810" y="485" text-anchor="middle" font-size="12">9: artifact metadata</text>
+                        
+                        <!-- 10. Resolve linux digest -->
+                        <rect x="690" y="510" width="40" height="40" fill="#fff9c4" stroke="#fbc02d" stroke-width="2"/>
+                        <text x="600" y="535" font-size="11" fill="#666">10: get_linux_digest()</text>
+                        
+                        <!-- 11. GET config -->
+                        <line x1="710" y1="570" x2="910" y2="570" stroke="#333" stroke-width="2" marker-end="url(#arrowblack)"/>
+                        <text x="810" y="565" text-anchor="middle" font-size="12">11: GET /artifacts/digest</text>
+                        
+                        <!-- 12. Return config -->
+                        <line x1="910" y1="600" x2="710" y2="600" stroke="#333" stroke-width="2" stroke-dasharray="3,3" marker-end="url(#arrowblack)"/>
+                        <text x="810" y="595" text-anchor="middle" font-size="12">12: config blob</text>
+                        
+                        <!-- 13. Validate config -->
+                        <rect x="690" y="620" width="40" height="40" fill="#fff9c4" stroke="#fbc02d" stroke-width="2"/>
+                        <text x="600" y="645" font-size="11" fill="#666">13: check_for_unhandled_config()</text>
+                        
+                        <!-- 14. Write files -->
+                        <rect x="690" y="680" width="40" height="60" fill="#fff9c4" stroke="#fbc02d" stroke-width="2"/>
+                        <text x="580" y="695" font-size="11" fill="#666">14: Write path.txt</text>
+                        <text x="580" y="710" font-size="11" fill="#666">     Write cmd.txt</text>
+                        <text x="580" y="725" font-size="11" fill="#666">     Write args.txt</text>
+                        
+                        <!-- 15. Complete -->
+                        <line x1="710" y1="760" x2="510" y2="760" stroke="#333" stroke-width="2" stroke-dasharray="3,3" marker-end="url(#arrowblack)"/>
+                        <text x="610" y="755" text-anchor="middle" font-size="12">15: Complete (outputs)</text>
+                        
+                        <!-- 16. Continue workflow -->
+                        <rect x="490" y="780" width="40" height="40" fill="#c8e6c9" stroke="#4caf50" stroke-width="2"/>
+                        <text x="300" y="805" font-size="11" fill="#666">16: Execute remaining steps...</text>
+                    </svg>
+                </div>
+                
+                <div class="warning-box">
+                    <h4>Error Handling</h4>
+                    <p>The system includes comprehensive error handling:</p>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li><strong>Configuration Validation:</strong> Raises NotImplementedError if Entrypoint is detected</li>
+                        <li><strong>API Failures:</strong> Harbor client should handle connection errors and authentication failures</li>
+                        <li><strong>Volume Errors:</strong> Directory creation failures will cause container exit with error code</li>
+                        <li><strong>Workflow Continuity:</strong> Main execution step has continueOn.failed = true to allow cleanup even on failure</li>
+                    </ul>
+                </div>
+            </section>
+            
+            <!-- COMPONENTS SECTION -->
+            <section id="components">
+                <h2>Component Details</h2>
+                
+                <h3>Windrunner Module Breakdown</h3>
+                
+                <div class="component-box">
+                    <h4>main.py - Main Execution Module</h4>
+                    <p><strong>Purpose:</strong> CLI entrypoint that orchestrates the metadata extraction workflow</p>
+                    
+                    <h4 style="margin-top: 15px;">Functions:</h4>
+                    <table style="margin-top: 10px;">
+                        <thead>
+                            <tr>
+                                <th>Function</th>
+                                <th>Parameters</th>
+                                <th>Returns</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>main()</code></td>
+                                <td>proj, repo, tag</td>
+                                <td>Boolean</td>
+                                <td>Orchestrates entire extraction flow from API calls to file persistence</td>
+                            </tr>
+                            <tr>
+                                <td><code>check_for_unhandled_config()</code></td>
+                                <td>config: dict</td>
+                                <td>Boolean</td>
+                                <td>Validates config doesn't contain unsupported Entrypoint field</td>
+                            </tr>
+                            <tr>
+                                <td><code>store_container_config()</code></td>
+                                <td>data: dict</td>
+                                <td>Boolean</td>
+                                <td>Writes WorkingDir, Cmd[0], and Cmd[1:] to volume files</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <h4 style="margin-top: 15px;">Execution Flow:</h4>
+                    <ol style="margin-left: 20px; margin-top: 10px;">
+                        <li>Initialize timing measurement</li>
+                        <li>Load environment configuration from env.py</li>
+                        <li>Create /mnt/vol/digitalforge directory if not exists</li>
+                        <li>Import Harbor client functions from windbinder</li>
+                        <li>Build artifact URL from parameters</li>
+                        <li>Fetch artifact metadata via Harbor API</li>
+                        <li>Resolve Linux-specific manifest digest</li>
+                        <li>Fetch configuration blob for that digest</li>
+                        <li>Validate configuration (no Entrypoint)</li>
+                        <li>Persist WorkingDir, Cmd, Args to files</li>
+                        <li>Print execution time and exit</li>
+                    </ol>
+                </div>
+                
+                <div class="component-box">
+                    <h4>env.py - Environment Configuration</h4>
+                    <p><strong>Purpose:</strong> Centralize environment-derived configuration with sensible defaults</p>
+                    
+                    <h4 style="margin-top: 15px;">Configuration Variables:</h4>
+                    <table style="margin-top: 10px;">
+                        <thead>
+                            <tr>
+                                <th>Variable</th>
+                                <th>Default Value</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>VOLUME</code></td>
+                                <td>/mnt/vol</td>
+                                <td>Mount path where output files are written</td>
+                            </tr>
+                            <tr>
+                                <td><code>HARBORHOST</code></td>
+                                <td>http://harbor-core.harbor/api/v2.0</td>
+                                <td>Base URL for Harbor REST API</td>
+                            </tr>
+                            <tr>
+                                <td><code>HARBORUSER</code></td>
+                                <td>admin</td>
+                                <td>Harbor authentication username</td>
+                            </tr>
+                            <tr>
+                                <td><code>HARBORPASS</code></td>
+                                <td>Harbor12345</td>
+                                <td>Harbor authentication password (should use secrets in production)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="component-box">
+                    <h4>windbinder Package</h4>
+                    <p><strong>Purpose:</strong> Harbor API client wrapper (implementation details not in repository)</p>
+                    
+                    <h4 style="margin-top: 15px;">Expected Functions:</h4>
+                    <table style="margin-top: 10px;">
+                        <thead>
+                            <tr>
+                                <th>Function</th>
+                                <th>Purpose</th>
+                                <th>Expected Behavior</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>get_artifact(url)</code></td>
+                                <td>Fetch artifact metadata from Harbor</td>
+                                <td>Makes authenticated GET request, returns JSON response</td>
+                            </tr>
+                            <tr>
+                                <td><code>get_linux_digest(artifact_data)</code></td>
+                                <td>Extract Linux platform digest from manifest list</td>
+                                <td>Parses manifests array, filters for linux/amd64, returns digest</td>
+                            </tr>
+                            <tr>
+                                <td><code>get_config(artifact_data)</code></td>
+                                <td>Extract configuration blob from artifact</td>
+                                <td>Retrieves config section containing WorkingDir, Cmd, etc.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <h3>Output File Specifications</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>File</th>
+                            <th>Path</th>
+                            <th>Format</th>
+                            <th>Content</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>path.txt</strong></td>
+                            <td>/mnt/vol/digitalforge/path.txt</td>
+                            <td>Plain text</td>
+                            <td>Container WorkingDir value (e.g., /app, /workspace)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>cmd.txt</strong></td>
+                            <td>/mnt/vol/digitalforge/cmd.txt</td>
+                            <td>Plain text</td>
+                            <td>First element of Cmd array (executable path)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>args.txt</strong></td>
+                            <td>/mnt/vol/digitalforge/args.txt</td>
+                            <td>JSON array</td>
+                            <td>Remaining Cmd elements as JSON: ["arg1", "arg2", ...]</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <h3>Dependencies</h3>
+                <div class="grid-2">
+                    <div class="card">
+                        <h4>Python Packages</h4>
+                        <table>
+                            <tr><td>GitPython</td><td>3.1.37</td><td>Git repository interaction</td></tr>
+                            <tr><td>Jinja2</td><td>3.1.2</td><td>Template rendering</td></tr>
+                            <tr><td>minio</td><td>7.1.17</td><td>S3-compatible storage client</td></tr>
+                            <tr><td>fire</td><td>0.5.0</td><td>CLI framework</td></tr>
+                            <tr><td>docker</td><td>6.1.3</td><td>Docker SDK for Python</td></tr>
+                        </table>
+                    </div>
+                    
+                    <div class="card">
+                        <h4>External Services</h4>
+                        <ul class="features">
+                            <li>Harbor Container Registry (API v2.0)</li>
+                            <li>Kubernetes API (for pod scheduling)</li>
+                            <li>Persistent Volume provisioner</li>
+                            <li>Container runtime (Docker/containerd)</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- FOOTER -->
+            <footer style="background: #2c3e50; color: white; padding: 30px; text-align: center; margin-top: 60px;">
+                <p style="font-size: 1.1em; margin-bottom: 10px;">Windrunner System Architecture Documentation</p>
+                <p style="font-size: 0.9em; opacity: 0.8;">Generated: February 2026 | SysML v2 Model Compliant</p>
+                <p style="font-size: 0.85em; margin-top: 15px; opacity: 0.7;">
+                    Copyright © 2023-2024 Westfall Inc. | Licensed under GNU Affero General Public License v3.0
+                </p>
+            </footer>
+        </div>
+    </div>
+</body>
+</html>

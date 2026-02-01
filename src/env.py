@@ -17,6 +17,23 @@
 
 import os
 
+"""Environment configuration for Windrunner.
+
+This module centralizes environment-derived configuration values used
+by the Windrunner tooling. It reads a small set of environment
+variables and provides sensible defaults when those variables are
+not present. The values defined here are imported elsewhere in the
+project (for example `main.py`) to construct paths and to contact
+the Harbor API.
+
+Constants:
+	VOLDEF: default mount path used when `VOLUME` is not set.
+	VOLUME: runtime volume path (from `VOLUME` env var or `VOLDEF`).
+	HARBORHOST: base URL for the Harbor API.
+	HARBORUSER: default Harbor username.
+	HARBORPASS: default Harbor password.
+"""
+
 ## WINDRUNNER CONFIGURATION VALUES
 VOLDEF = "/mnt/vol"
 VOLUME = os.environ.get("VOLUME",VOLDEF)
